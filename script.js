@@ -57,6 +57,10 @@ function initGame() {
     score = 0;
     scoreElement.textContent = score;
     gameOver = false;
+    
+    // Show reset button when game is not running
+    resetBtn.style.display = 'inline-block';
+    
     placeFood();
 }
 
@@ -248,6 +252,9 @@ function drawGameOver() {
     
     gameRunning = false;
     startBtn.textContent = 'Start Game';
+    
+    // Show reset button when game is over
+    resetBtn.style.display = 'inline-block';
 }
 
 // Event listeners
@@ -260,9 +267,15 @@ startBtn.addEventListener('click', function() {
         gameRunning = true;
         window.requestAnimationFrame(gameLoop);
         this.textContent = 'Pause';
+        
+        // Hide reset button while game is running
+        resetBtn.style.display = 'none';
     } else {
         gameRunning = false;
         this.textContent = 'Resume';
+        
+        // Show reset button when game is paused
+        resetBtn.style.display = 'inline-block';
     }
 });
 
@@ -310,9 +323,15 @@ document.addEventListener('keydown', function(event) {
             gameRunning = true;
             window.requestAnimationFrame(gameLoop);
             startBtn.textContent = 'Pause';
+            
+            // Hide reset button while game is running
+            resetBtn.style.display = 'none';
         } else {
             gameRunning = false;
             startBtn.textContent = 'Resume';
+            
+            // Show reset button when game is paused
+            resetBtn.style.display = 'inline-block';
         }
     }
     
@@ -327,6 +346,9 @@ document.addEventListener('keydown', function(event) {
         gameRunning = true;
         window.requestAnimationFrame(gameLoop);
         startBtn.textContent = 'Pause';
+        
+        // Hide reset button while game is running
+        resetBtn.style.display = 'none';
     }
 });
 
@@ -388,6 +410,9 @@ canvas.addEventListener('touchmove', function(event) {
         gameRunning = true;
         window.requestAnimationFrame(gameLoop);
         startBtn.textContent = 'Pause';
+        
+        // Hide reset button while game is running
+        resetBtn.style.display = 'none';
     }
     
     // Reset touch start position

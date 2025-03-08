@@ -11,6 +11,7 @@ const gridSize = 20;
 const tileCount = canvas.width / gridSize;
 let speed = 7;
 const SWIPE_THRESHOLD = 30; // Minimum swipe distance to register
+let lastRenderTime = 0;
 
 // Game state
 let gameRunning = false;
@@ -62,36 +63,54 @@ function initGame() {
 // Place food at random position
 function placeFood() {
     // Generate random position for food
-    foodX = Math.floor(Math.random() * tileCount);
-    foodY = Math.floor(Math.random() * tileCount);
+    let newFoodX, newFoodY;
+    let foodOnSnake = true;
     
-    // Make sure food doesn't spawn on snake
-    for (let i = 0; i < snake.length; i++) {
-        if (snake[i].x === foodX && snake[i].y === foodY) {
-            placeFood(); // Try again if food spawns on snake
-            return;
+    // Keep generating new positions until we find one that's not on the snake
+    while (foodOnSnake) {
+        foodOnSnake = false;
+        newFoodX = Math.floor(Math.random() * tileCount);
+        newFoodY = Math.floor(Math.random() * tileCount);
+        
+        // Check if the new food position is on any part of the snake
+        for (let i = 0; i < snake.length; i++) {
+            if (snake[i].x === newFoodX && snake[i].y === newFoodY) {
+                foodOnSnake = true;
+                break;
+            }
         }
     }
+    
+    // Set the food position
+    foodX = newFoodX;
+    foodY = newFoodY;
 }
 
 // Game loop
-function gameLoop() {
+function gameLoop(currentTime) {
     if (!gameRunning) return;
+    
+    window.requestAnimationFrame(gameLoop);
+    
+    // Calculate time since last render
+    const secondsSinceLastRender = (currentTime - lastRenderTime) / 1000;
+    
+    // Only update game at the specified speed
+    if (secondsSinceLastRender < 1 / speed) return;
+    
+    lastRenderTime = currentTime;
     
     if (gameOver) {
         drawGameOver();
         return;
     }
     
-    setTimeout(function() {
-        clearCanvas();
-        drawGrid();
-        moveSnake();
-        drawFood();
-        drawSnake();
-        checkCollision();
-        gameLoop();
-    }, 1000 / speed);
+    clearCanvas();
+    drawGrid();
+    moveSnake();
+    drawFood();
+    drawSnake();
+    checkCollision();
 }
 
 // Clear canvas
@@ -237,7 +256,7 @@ startBtn.addEventListener('click', function() {
             initGame();
         }
         gameRunning = true;
-        gameLoop();
+        window.requestAnimationFrame(gameLoop);
         this.textContent = 'Pause';
     } else {
         gameRunning = false;
@@ -286,7 +305,7 @@ document.addEventListener('keydown', function(event) {
                 initGame();
             }
             gameRunning = true;
-            gameLoop();
+            window.requestAnimationFrame(gameLoop);
             startBtn.textContent = 'Pause';
         } else {
             gameRunning = false;
@@ -302,7 +321,7 @@ document.addEventListener('keydown', function(event) {
             initGame();
         }
         gameRunning = true;
-        gameLoop();
+        window.requestAnimationFrame(gameLoop);
         startBtn.textContent = 'Pause';
     }
 });
@@ -362,7 +381,7 @@ canvas.addEventListener('touchmove', function(event) {
             initGame();
         }
         gameRunning = true;
-        gameLoop();
+        window.requestAnimationFrame(gameLoop);
         startBtn.textContent = 'Pause';
     }
     

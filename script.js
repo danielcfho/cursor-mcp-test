@@ -10,6 +10,7 @@ const highScoreElement = document.getElementById('highScore');
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
 let speed = 7;
+const SWIPE_THRESHOLD = 30; // Minimum swipe distance to register
 
 // Game state
 let gameRunning = false;
@@ -38,10 +39,18 @@ const gridColor = '#e5e5ea';
 
 // Initialize the game
 function initGame() {
+    // Clear snake array
     snake = [];
-    tailLength = 2;
+    
+    // Set initial position
     snakeX = 10;
     snakeY = 10;
+    
+    // Add initial snake segments (head + 1 body segment)
+    snake.push({x: snakeX, y: snakeY}); // Head
+    snake.push({x: snakeX-1, y: snakeY}); // Body segment
+    
+    tailLength = 2;
     velocityX = 0;
     velocityY = 0;
     score = 0;
@@ -115,6 +124,9 @@ function drawGrid() {
 
 // Move snake
 function moveSnake() {
+    // Only move if the snake has a direction
+    if (velocityX === 0 && velocityY === 0) return;
+    
     // Update snake position
     snakeX += velocityX;
     snakeY += velocityY;
@@ -242,33 +254,50 @@ resetBtn.addEventListener('click', function() {
 // Keyboard controls
 document.addEventListener('keydown', function(event) {
     // Prevent arrow keys from scrolling the page
-    if ([37, 38, 39, 40].includes(event.keyCode)) {
+    if (['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown', ' '].includes(event.key) || 
+        [32, 37, 38, 39, 40].includes(event.keyCode)) {
         event.preventDefault();
     }
     
     // Left arrow
-    if (event.keyCode === 37 && velocityX !== 1) {
+    if ((event.key === 'ArrowLeft' || event.keyCode === 37) && velocityX !== 1) {
         velocityX = -1;
         velocityY = 0;
     }
     // Up arrow
-    else if (event.keyCode === 38 && velocityY !== 1) {
+    else if ((event.key === 'ArrowUp' || event.keyCode === 38) && velocityY !== 1) {
         velocityX = 0;
         velocityY = -1;
     }
     // Right arrow
-    else if (event.keyCode === 39 && velocityX !== -1) {
+    else if ((event.key === 'ArrowRight' || event.keyCode === 39) && velocityX !== -1) {
         velocityX = 1;
         velocityY = 0;
     }
     // Down arrow
-    else if (event.keyCode === 40 && velocityY !== -1) {
+    else if ((event.key === 'ArrowDown' || event.keyCode === 40) && velocityY !== -1) {
         velocityX = 0;
         velocityY = 1;
     }
+    // Space bar to pause/resume
+    else if (event.key === ' ' || event.keyCode === 32) {
+        if (!gameRunning) {
+            if (gameOver) {
+                initGame();
+            }
+            gameRunning = true;
+            gameLoop();
+            startBtn.textContent = 'Pause';
+        } else {
+            gameRunning = false;
+            startBtn.textContent = 'Resume';
+        }
+    }
     
     // Start game with any arrow key if not running
-    if (!gameRunning && [37, 38, 39, 40].includes(event.keyCode)) {
+    if (!gameRunning && 
+        (['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'].includes(event.key) || 
+         [37, 38, 39, 40].includes(event.keyCode))) {
         if (gameOver) {
             initGame();
         }
@@ -296,6 +325,11 @@ canvas.addEventListener('touchmove', function(event) {
     
     let dx = touchEndX - touchStartX;
     let dy = touchEndY - touchStartY;
+    
+    // Only register swipe if it exceeds the threshold
+    if (Math.abs(dx) < SWIPE_THRESHOLD && Math.abs(dy) < SWIPE_THRESHOLD) {
+        return;
+    }
     
     // Determine swipe direction based on which axis had larger movement
     if (Math.abs(dx) > Math.abs(dy)) {
@@ -338,6 +372,20 @@ canvas.addEventListener('touchmove', function(event) {
     
     event.preventDefault();
 });
+
+// Reset touch coordinates when finger is lifted
+canvas.addEventListener('touchend', function(event) {
+    touchStartX = 0;
+    touchStartY = 0;
+    event.preventDefault();
+});
+
+// Fix for mobile devices to prevent scrolling while playing
+document.body.addEventListener('touchmove', function(event) {
+    if (gameRunning) {
+        event.preventDefault();
+    }
+}, { passive: false });
 
 // Initialize the game
 initGame();

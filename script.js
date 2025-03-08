@@ -247,6 +247,7 @@ function drawGameOver() {
     ctx.fillText('Press Start to play again', canvas.width / 2, canvas.height / 2 + 50);
     
     gameRunning = false;
+    startBtn.textContent = 'Start Game';
 }
 
 // Event listeners
@@ -254,6 +255,7 @@ startBtn.addEventListener('click', function() {
     if (!gameRunning) {
         if (gameOver) {
             initGame();
+            gameOver = false;
         }
         gameRunning = true;
         window.requestAnimationFrame(gameLoop);
@@ -303,6 +305,7 @@ document.addEventListener('keydown', function(event) {
         if (!gameRunning) {
             if (gameOver) {
                 initGame();
+                gameOver = false;
             }
             gameRunning = true;
             window.requestAnimationFrame(gameLoop);
@@ -319,6 +322,7 @@ document.addEventListener('keydown', function(event) {
          [37, 38, 39, 40].includes(event.keyCode))) {
         if (gameOver) {
             initGame();
+            gameOver = false;
         }
         gameRunning = true;
         window.requestAnimationFrame(gameLoop);
@@ -379,6 +383,7 @@ canvas.addEventListener('touchmove', function(event) {
     if (!gameRunning) {
         if (gameOver) {
             initGame();
+            gameOver = false;
         }
         gameRunning = true;
         window.requestAnimationFrame(gameLoop);
